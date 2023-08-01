@@ -2,10 +2,10 @@ Class {
 	#name : #CallGraphViz,
 	#superclass : #GraphViz,
 	#instVars : [
-		'scopedPackages',
 		'rootMethod',
 		'scopeBlock',
-		'excludedTags'
+		'excludedTags',
+		'packages'
 	],
 	#category : #CallGraphViz
 }
@@ -27,6 +27,24 @@ CallGraphViz class >> callGraphOfMethod: aCompiledMethod levels: maxLevelsNumber
 		openCallGraphView: maxLevelsNumber
 ]
 
+{ #category : #'call-graph' }
+CallGraphViz class >> callGraphOfMethod: aCompiledMethod packages: aPackagesCollection [
+
+	^ self new
+		rootMethod: aCompiledMethod;
+		packages: aPackagesCollection;
+		openCallGraphView
+]
+
+{ #category : #'call-graph' }
+CallGraphViz class >> callGraphOfMethod: aCompiledMethod packages: aPackagesCollection levels: maxLevelsNumber [
+
+	^ self new
+		rootMethod: aCompiledMethod;
+		packages: aPackagesCollection;
+		openCallGraphView: maxLevelsNumber
+]
+
 { #category : #'instance creation' }
 CallGraphViz class >> example [
 
@@ -39,12 +57,6 @@ CallGraphViz class >> exampleWithLevels [
 	self 
 		callGraphOfMethod: (SpurMemoryManager >> #addFreeSubTree:)
 		levels: 5.
-]
-
-{ #category : #filtering }
-CallGraphViz >> applyFilter: aCollectionOfCompiledMethod scope: scopeBlock [
-
-	^ aCollectionOfCompiledMethod select: scopeBlock
 ]
 
 { #category : #accessing }
@@ -91,6 +103,7 @@ CallGraphViz >> callGraphOfMethod: aCompiledMethod levels: maxLevelsNumber [
 
 { #category : #colors }
 CallGraphViz >> colorFor: aNumber [
+	"Refer to GraphViz Bewer color schemes"
 
 	^ (6 min: aNumber) asString
 
@@ -118,6 +131,22 @@ CallGraphViz >> configureCallGraphAttributes [
 				}.
 ]
 
+{ #category : #iterating }
+CallGraphViz >> configureNodeProperties: fromCompiledMethod to: toCompiledMethod [
+
+	fromCompiledMethod senders 
+		ifEmpty: [ self add: #node with: self emptyNodeProperties ]
+		ifNotEmpty: [: cmSenders | 
+			self 
+				add: #node 
+				with: { 
+					#fontcolor -> #black . 
+					#fillcolor -> (self colorFor: fromCompiledMethod senders size) } ].
+	self 
+		add: fromCompiledMethod name -> toCompiledMethod name 
+		with: self callGraphArrowProperties.
+]
+
 { #category : #filtering }
 CallGraphViz >> defaultExcludedTags [
 
@@ -126,9 +155,10 @@ CallGraphViz >> defaultExcludedTags [
 
 { #category : #filtering }
 CallGraphViz >> defaultScopeBlock [
+	"Answer a <BlockClosure> used to narrow call graph selections"
 
 	^ [ : cm | 
-			(self scopedPackages includes: cm package)
+			(self packages includes: cm package)
 				and: [ (self excludedTags includes: cm methodClass packageTag) not
 					and: [ (cm selector beginsWithAnyOf: #(#setUp #primitive #test)) not ] ] ]
 ]
@@ -146,15 +176,20 @@ CallGraphViz >> excludedTags [
 		ifNil: [ excludedTags := self defaultExcludedTags ]
 ]
 
+{ #category : #accessing }
+CallGraphViz >> excludedTags: anObject [
+
+	excludedTags := anObject
+]
+
 { #category : #iterating }
 CallGraphViz >> iterateCallGraph: aCollectionOfCompiledMethod from: compiledMethod [
 
-	(self applyFilter: aCollectionOfCompiledMethod scope: self scopeBlock) 
+	(aCollectionOfCompiledMethod select: self scopeBlock)
 		do: [ : cm |
 			(self nodeNamed: cm name)
 				ifNil: [ 
-					"self add: cm name with: #label -> cm name."
-					self add: cm name -> compiledMethod name with: self callGraphArrowProperties.
+					self configureNodeProperties: cm to: compiledMethod. 
 					self iterateCallGraph: cm senders from: cm ] ]
 		displayingProgress: [ : each | 'Collecting senders of ' , each name ]
 ]
@@ -164,15 +199,11 @@ CallGraphViz >> iterateCallGraph: aCollectionOfCompiledMethod from: compiledMeth
 
 	maxLevelsNumber <= 0
 		ifTrue: [ ^ self ].
-	(self applyFilter: aCollectionOfCompiledMethod scope: self scopeBlock) 
+	(aCollectionOfCompiledMethod select: self scopeBlock)
 		do: [ : cm |
 			(self nodeNamed: cm name)
 				ifNil: [ 
-					"self add: cm name with: #label -> cm name."
-					cm senders 
-						ifEmpty: [ self add: #node with: self emptyNodeProperties ]
-						ifNotEmpty: [: cmSenders |  self add: #node with: { #fontcolor -> #black . #fillcolor -> (self colorFor: cm senders size) } ].
-					self add: cm name -> compiledMethod name with: self callGraphArrowProperties.
+					self configureNodeProperties: cm to: compiledMethod. 
 					self iterateCallGraph: cm senders from: cm levels: maxLevelsNumber - 1] ]
 		displayingProgress: [ : each | 'Collecting senders of ' , each name ]
 ]
@@ -191,6 +222,19 @@ CallGraphViz >> openCallGraphView: maxLevelsNumber [
 	self 
 		callGraphOfMethod: self rootMethod
 		levels: maxLevelsNumber
+]
+
+{ #category : #filtering }
+CallGraphViz >> packages [
+
+	^ packages
+		ifNil: [ packages := { self rootMethod package } ]
+]
+
+{ #category : #filtering }
+CallGraphViz >> packages: anObject [
+
+	packages := anObject
 ]
 
 { #category : #accessing }
@@ -213,15 +257,8 @@ CallGraphViz >> scopeBlock [
 		ifNil: [ scopeBlock := self defaultScopeBlock ]
 ]
 
-{ #category : #filtering }
-CallGraphViz >> scopedPackages [
+{ #category : #accessing }
+CallGraphViz >> scopeBlock: anObject [
 
-	^ scopedPackages
-		ifNil: [ scopedPackages := { self rootMethod package } ]
-]
-
-{ #category : #filtering }
-CallGraphViz >> scopedPackages: anObject [
-
-	scopedPackages := anObject
+	scopeBlock := anObject
 ]
