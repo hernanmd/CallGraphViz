@@ -1,0 +1,1 @@
+SmalltalkCISpec {  #loading : [    SCIMetacelloLoadSpec {      #baseline : 'CallGraphViz',      #directory : 'src',      #platforms : [ #pharo ]    }  ],  #testing : {    #coverage : {      #packages : [ 'CallGraphViz*' ]    }  }}
