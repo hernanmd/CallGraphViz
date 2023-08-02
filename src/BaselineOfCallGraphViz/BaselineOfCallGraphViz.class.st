@@ -11,10 +11,7 @@ BaselineOfCallGraphViz >> baseline: spec [
 		for: #(common)
 		do: [ 
 			spec
-				baseline: 'GraphViz'           with: [ 
-					spec 
-						baseline: 'GraphViz';
-						repository: 'github://hernanmd/GraphViz/' ].
+				baseline: 'GraphViz'           with: [ spec repository: 'github://hernanmd/GraphViz/' ].
 			spec 
 				package: 'CallGraphViz'        with: [ spec requires: #(GraphViz) ];
 				package: 'CallGraphViz-Tests'	with: [ spec requires: #(CallGraphViz) ].
