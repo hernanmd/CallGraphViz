@@ -1,16 +1,17 @@
 Class {
-	#name : #CallGraphViz,
-	#superclass : #GraphViz,
+	#name : 'CallGraphViz',
+	#superclass : 'GraphViz',
 	#instVars : [
 		'rootMethod',
 		'scopeBlock',
 		'excludedTags',
 		'packages'
 	],
-	#category : #CallGraphViz
+	#category : 'CallGraphViz',
+	#package : 'CallGraphViz'
 }
 
-{ #category : #'call-graph' }
+{ #category : 'call-graph' }
 CallGraphViz class >> callGraphOfMethod: aCompiledMethod [
 
 	^ self new
@@ -18,7 +19,7 @@ CallGraphViz class >> callGraphOfMethod: aCompiledMethod [
 		openCallGraphView
 ]
 
-{ #category : #'call-graph' }
+{ #category : 'call-graph' }
 CallGraphViz class >> callGraphOfMethod: aCompiledMethod levels: maxLevelsNumber [
 	" Open a call graph using aCompiledMethod as root node and up to maxLevelsNumber in the sender chain "
 
@@ -27,7 +28,7 @@ CallGraphViz class >> callGraphOfMethod: aCompiledMethod levels: maxLevelsNumber
 		openCallGraphView: maxLevelsNumber
 ]
 
-{ #category : #'call-graph' }
+{ #category : 'call-graph' }
 CallGraphViz class >> callGraphOfMethod: aCompiledMethod packages: aPackagesCollection [
 
 	^ self new
@@ -36,7 +37,7 @@ CallGraphViz class >> callGraphOfMethod: aCompiledMethod packages: aPackagesColl
 		openCallGraphView
 ]
 
-{ #category : #'call-graph' }
+{ #category : 'call-graph' }
 CallGraphViz class >> callGraphOfMethod: aCompiledMethod packages: aPackagesCollection levels: maxLevelsNumber [
 
 	^ self new
@@ -45,21 +46,24 @@ CallGraphViz class >> callGraphOfMethod: aCompiledMethod packages: aPackagesColl
 		openCallGraphView: maxLevelsNumber
 ]
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 CallGraphViz class >> example [
 
-	self callGraphOfMethod: (SpurMemoryManager >> #addFreeSubTree:).
+	(Smalltalk hasClassNamed: #SpurMemoryManager)
+		ifTrue: [ self callGraphOfMethod: ((Smalltalk at: #SpurMemoryManager) >> #addFreeSubTree:) ]
+		ifFalse: [ self callGraphOfMethod: (String >> #asDate) ].
 ]
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 CallGraphViz class >> exampleWithLevels [
 
-	self 
-		callGraphOfMethod: (SpurMemoryManager >> #addFreeSubTree:)
-		levels: 5.
+	(Smalltalk hasClassNamed: #SpurMemoryManager)
+		ifTrue: [ self callGraphOfMethod: ((Smalltalk at: #SpurMemoryManager) >> #addFreeSubTree:) levels: 5 ]
+		ifFalse: [ self callGraphOfMethod: (String >> #asDate) levels: 5 ]
+		.
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 CallGraphViz >> callGraphArrowProperties [
 
 	^ { 
@@ -68,7 +72,7 @@ CallGraphViz >> callGraphArrowProperties [
 	}
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 CallGraphViz >> callGraphLabelProperties: aCompiledMethod [
 
 	^ {
@@ -77,7 +81,7 @@ CallGraphViz >> callGraphLabelProperties: aCompiledMethod [
 		}
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 CallGraphViz >> callGraphOfMethod: aCompiledMethod [
 	
 	self
@@ -88,7 +92,7 @@ CallGraphViz >> callGraphOfMethod: aCompiledMethod [
 		openInWindow
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 CallGraphViz >> callGraphOfMethod: aCompiledMethod levels: maxLevelsNumber [
 	
 	self
@@ -101,7 +105,7 @@ CallGraphViz >> callGraphOfMethod: aCompiledMethod levels: maxLevelsNumber [
 		openInWindow
 ]
 
-{ #category : #colors }
+{ #category : 'colors' }
 CallGraphViz >> colorFor: aNumber [
 	"Refer to GraphViz Bewer color schemes"
 
@@ -109,7 +113,7 @@ CallGraphViz >> colorFor: aNumber [
 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 CallGraphViz >> configureCallGraphAttributes [
 
 	self
@@ -131,7 +135,7 @@ CallGraphViz >> configureCallGraphAttributes [
 				}.
 ]
 
-{ #category : #iterating }
+{ #category : 'iterating' }
 CallGraphViz >> configureNodeProperties: fromCompiledMethod to: toCompiledMethod [
 
 	fromCompiledMethod senders 
@@ -147,13 +151,13 @@ CallGraphViz >> configureNodeProperties: fromCompiledMethod to: toCompiledMethod
 		with: self callGraphArrowProperties.
 ]
 
-{ #category : #filtering }
+{ #category : 'filtering' }
 CallGraphViz >> defaultExcludedTags [
 
 	^ #(#Plugins  #'Plugins-Surface')
 ]
 
-{ #category : #filtering }
+{ #category : 'filtering' }
 CallGraphViz >> defaultScopeBlock [
 	"Answer a <BlockClosure> used to narrow call graph selections"
 
@@ -163,26 +167,26 @@ CallGraphViz >> defaultScopeBlock [
 					and: [ (cm selector beginsWithAnyOf: #(#setUp #primitive #test)) not ] ] ]
 ]
 
-{ #category : #colors }
+{ #category : 'colors' }
 CallGraphViz >> emptyNodeProperties [
 
 	^ { #fontcolor -> #white . #fillcolor -> 9 }
 ]
 
-{ #category : #filtering }
+{ #category : 'filtering' }
 CallGraphViz >> excludedTags [
 
 	^ excludedTags
 		ifNil: [ excludedTags := self defaultExcludedTags ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 CallGraphViz >> excludedTags: anObject [
 
 	excludedTags := anObject
 ]
 
-{ #category : #iterating }
+{ #category : 'iterating' }
 CallGraphViz >> iterateCallGraph: aCollectionOfCompiledMethod from: compiledMethod [
 
 	(aCollectionOfCompiledMethod select: self scopeBlock)
@@ -194,7 +198,7 @@ CallGraphViz >> iterateCallGraph: aCollectionOfCompiledMethod from: compiledMeth
 		displayingProgress: [ : each | 'Collecting senders of ' , each name ]
 ]
 
-{ #category : #iterating }
+{ #category : 'iterating' }
 CallGraphViz >> iterateCallGraph: aCollectionOfCompiledMethod from: compiledMethod levels: maxLevelsNumber [
 
 	maxLevelsNumber <= 0
@@ -208,14 +212,14 @@ CallGraphViz >> iterateCallGraph: aCollectionOfCompiledMethod from: compiledMeth
 		displayingProgress: [ : each | 'Collecting senders of ' , each name ]
 ]
 
-{ #category : #opening }
+{ #category : 'opening' }
 CallGraphViz >> openCallGraphView [
 
 	self 
 		callGraphOfMethod: self rootMethod
 ]
 
-{ #category : #opening }
+{ #category : 'opening' }
 CallGraphViz >> openCallGraphView: maxLevelsNumber [
 	" Open a call graph view starting analysis from the receiver's root method and follow the sender chain up to maxLevelsNumber <Number> "
 
@@ -224,32 +228,32 @@ CallGraphViz >> openCallGraphView: maxLevelsNumber [
 		levels: maxLevelsNumber
 ]
 
-{ #category : #filtering }
+{ #category : 'filtering' }
 CallGraphViz >> packages [
 
 	^ packages
 		ifNil: [ packages := { self rootMethod package } ]
 ]
 
-{ #category : #filtering }
+{ #category : 'filtering' }
 CallGraphViz >> packages: anObject [
 
 	packages := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 CallGraphViz >> rootMethod [
 
 	^ rootMethod
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 CallGraphViz >> rootMethod: anObject [
 
 	rootMethod := anObject
 ]
 
-{ #category : #filtering }
+{ #category : 'filtering' }
 CallGraphViz >> scopeBlock [
 	" Answer a <BlockClosure> used to filter the graph output "
 
@@ -257,7 +261,7 @@ CallGraphViz >> scopeBlock [
 		ifNil: [ scopeBlock := self defaultScopeBlock ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 CallGraphViz >> scopeBlock: anObject [
 
 	scopeBlock := anObject

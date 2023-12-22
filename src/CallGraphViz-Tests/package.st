@@ -1,1 +1,1 @@
-Package { #name : #'CallGraphViz-Tests' }
+Package { #name : 'CallGraphViz-Tests' }
