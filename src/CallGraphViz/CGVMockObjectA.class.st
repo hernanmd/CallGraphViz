@@ -8,28 +8,28 @@ Class {
 { #category : 'examples' }
 CGVMockObjectA class >> example1 [
 
-	CallGraphViz callGraphOfMethod: (CGVMockObjectA >> #methodWithOneSender).
+	CallGraphViz openCallGraphOfMethod: (CGVMockObjectA >> #methodWithOneSender).
 
 ]
 
 { #category : 'examples' }
 CGVMockObjectA class >> example2 [
 
-	CallGraphViz callGraphOfMethod: (CGVMockObjectA >> #methodWithTwoSenders).
+	CallGraphViz openCallGraphOfMethod: (CGVMockObjectA >> #methodWithTwoSenders).
 
 ]
 
 { #category : 'examples' }
 CGVMockObjectA class >> example3 [
 
-	CallGraphViz callGraphOfMethod: (CGVMockObjectA >> #methodWithOneSenderNested2).
+	CallGraphViz openCallGraphOfMethod: (CGVMockObjectA >> #methodWithOneSenderNested2).
 ]
 
 { #category : 'examples' }
 CGVMockObjectA class >> example4 [
 
 	Smalltalk garbageCollect.
-	CallGraphViz callGraphOfMethod: (CGVMockObjectA >> #methodCyclicSender).
+	CallGraphViz openCallGraphOfMethod: (CGVMockObjectA >> #methodCyclicSender).
 ]
 
 { #category : 'accessing' }

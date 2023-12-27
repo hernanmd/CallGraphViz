@@ -12,23 +12,6 @@ Class {
 }
 
 { #category : 'call-graph' }
-CallGraphViz class >> callGraphOfMethod: aCompiledMethod [
-
-	^ self new
-		rootMethod: aCompiledMethod;
-		openCallGraphView
-]
-
-{ #category : 'call-graph' }
-CallGraphViz class >> callGraphOfMethod: aCompiledMethod levels: maxLevelsNumber [
-	" Open a call graph using aCompiledMethod as root node and up to maxLevelsNumber in the sender chain "
-
-	^ self new
-		rootMethod: aCompiledMethod;
-		openCallGraphView: maxLevelsNumber
-]
-
-{ #category : 'call-graph' }
 CallGraphViz class >> callGraphOfMethod: aCompiledMethod packages: aPackagesCollection [
 
 	^ self new
@@ -50,17 +33,46 @@ CallGraphViz class >> callGraphOfMethod: aCompiledMethod packages: aPackagesColl
 CallGraphViz class >> example [
 
 	(Smalltalk hasClassNamed: #SpurMemoryManager)
-		ifTrue: [ self callGraphOfMethod: ((Smalltalk at: #SpurMemoryManager) >> #addFreeSubTree:) ]
-		ifFalse: [ self callGraphOfMethod: (String >> #asDate) ].
+		ifTrue: [ self openCallGraphOfMethod: ((Smalltalk at: #SpurMemoryManager) >> #addFreeSubTree:) ]
+		ifFalse: [ self openCallGraphOfMethod: (SortedCollection >> #sortBlock) ].
 ]
 
 { #category : 'instance creation' }
 CallGraphViz class >> exampleWithLevels [
 
 	(Smalltalk hasClassNamed: #SpurMemoryManager)
-		ifTrue: [ self callGraphOfMethod: ((Smalltalk at: #SpurMemoryManager) >> #addFreeSubTree:) levels: 5 ]
-		ifFalse: [ self callGraphOfMethod: (String >> #asDate) levels: 5 ]
+		ifTrue: [ self openCallGraphOfMethod: ((Smalltalk at: #SpurMemoryManager) >> #addFreeSubTree:) levels: 5 ]
+		ifFalse: [ self openCallGraphOfMethod: (String >> #asDate) levels: 5 ]
 		.
+]
+
+{ #category : 'call-graph' }
+CallGraphViz class >> openCallGraphOfMethod: aCompiledMethod [
+
+	^ self new
+		rootMethod: aCompiledMethod;
+		openCallGraphView
+]
+
+{ #category : 'call-graph' }
+CallGraphViz class >> openCallGraphOfMethod: aCompiledMethod levels: maxLevelsNumber [
+	" Open a call graph using aCompiledMethod as root node and up to maxLevelsNumber in the sender chain "
+
+	^ self new
+		rootMethod: aCompiledMethod;
+		openCallGraphView: maxLevelsNumber
+]
+
+{ #category : 'iterating' }
+CallGraphViz >> buildNodeLabel: cm [
+	"Set the receiver's node name using information from aCompiledMethod"
+
+	self nodeNamed: (String streamContents: [ : stream |
+		stream 
+			<< cm name;
+			<< ' (';
+			<< cm senders size asString;
+			<< ')' ])
 ]
 
 { #category : 'accessing' }
@@ -79,30 +91,6 @@ CallGraphViz >> callGraphLabelProperties: aCompiledMethod [
 			#label -> ('Call Graph of ', aCompiledMethod name). 
 			#fontsize -> 20 
 		}
-]
-
-{ #category : 'accessing' }
-CallGraphViz >> callGraphOfMethod: aCompiledMethod [
-	
-	self
-		name: #callGraphOf , aCompiledMethod selector;
-		configureCallGraphAttributes;
-		iterateCallGraph: aCompiledMethod senders from: aCompiledMethod;
-		add: #graph with: (self callGraphLabelProperties: aCompiledMethod);
-		openInWindow
-]
-
-{ #category : 'accessing' }
-CallGraphViz >> callGraphOfMethod: aCompiledMethod levels: maxLevelsNumber [
-	
-	self
-		name: #callGraphOf , aCompiledMethod selector;
-		configureCallGraphAttributes;
-		iterateCallGraph: aCompiledMethod senders
-			from: aCompiledMethod
-			levels: maxLevelsNumber;
-		add: #graph with: (self callGraphLabelProperties: aCompiledMethod);
-		openInWindow
 ]
 
 { #category : 'colors' }
@@ -213,10 +201,34 @@ CallGraphViz >> iterateCallGraph: aCollectionOfCompiledMethod from: compiledMeth
 ]
 
 { #category : 'opening' }
+CallGraphViz >> openCallGraphOfMethod: aCompiledMethod [
+	
+	self
+		name: #callGraphOf , aCompiledMethod selector;
+		configureCallGraphAttributes;
+		iterateCallGraph: aCompiledMethod senders from: aCompiledMethod;
+		add: #graph with: (self callGraphLabelProperties: aCompiledMethod);
+		openInWindow
+]
+
+{ #category : 'opening' }
+CallGraphViz >> openCallGraphOfMethod: aCompiledMethod levels: maxLevelsNumber [
+	
+	self
+		name: #callGraphOf , aCompiledMethod selector;
+		configureCallGraphAttributes;
+		iterateCallGraph: aCompiledMethod senders
+			from: aCompiledMethod
+			levels: maxLevelsNumber;
+		add: #graph with: (self callGraphLabelProperties: aCompiledMethod);
+		openInWindow
+]
+
+{ #category : 'opening' }
 CallGraphViz >> openCallGraphView [
 
 	self 
-		callGraphOfMethod: self rootMethod
+		openCallGraphOfMethod: self rootMethod
 ]
 
 { #category : 'opening' }
@@ -224,7 +236,7 @@ CallGraphViz >> openCallGraphView: maxLevelsNumber [
 	" Open a call graph view starting analysis from the receiver's root method and follow the sender chain up to maxLevelsNumber <Number> "
 
 	self 
-		callGraphOfMethod: self rootMethod
+		openCallGraphOfMethod: self rootMethod
 		levels: maxLevelsNumber
 ]
 
