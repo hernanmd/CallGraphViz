@@ -5,7 +5,9 @@ Class {
 		'rootMethod',
 		'scopeBlock',
 		'excludedTags',
-		'packages'
+		'packages',
+		'excludedMethods',
+		'excludedSelectors'
 	],
 	#category : 'CallGraphViz',
 	#package : 'CallGraphViz'
@@ -32,9 +34,9 @@ CallGraphViz class >> callGraphOfMethod: aCompiledMethod packages: aPackagesColl
 { #category : 'instance creation' }
 CallGraphViz class >> example [
 
-	(Smalltalk hasClassNamed: #SpurMemoryManager)
-		ifTrue: [ self openCallGraphOfMethod: ((Smalltalk at: #SpurMemoryManager) >> #addFreeSubTree:) ]
-		ifFalse: [ self openCallGraphOfMethod: (SortedCollection >> #sortBlock) ].
+	self new
+		rootMethod:  (SortedCollection >> #sortBlock);
+		openCallGraphView: 2.
 ]
 
 { #category : 'instance creation' }
@@ -44,6 +46,19 @@ CallGraphViz class >> exampleWithLevels [
 		ifTrue: [ self openCallGraphOfMethod: ((Smalltalk at: #SpurMemoryManager) >> #addFreeSubTree:) levels: 5 ]
 		ifFalse: [ self openCallGraphOfMethod: (String >> #asDate) levels: 5 ]
 		.
+]
+
+{ #category : 'instance creation' }
+CallGraphViz class >> exampleWithLevelsAndExclusions [
+
+	self
+		openCallGraphOfMethod: (Array >> #asArray)
+		levels: 8
+		excludeMethods: { 
+			(Array2D class >> #new:) .
+			(Heap >> #=) .
+			(Interval >> #=) .
+			(Array2D >> #=) }		.
 ]
 
 { #category : 'call-graph' }
@@ -60,6 +75,16 @@ CallGraphViz class >> openCallGraphOfMethod: aCompiledMethod levels: maxLevelsNu
 
 	^ self new
 		rootMethod: aCompiledMethod;
+		openCallGraphView: maxLevelsNumber
+]
+
+{ #category : 'call-graph' }
+CallGraphViz class >> openCallGraphOfMethod: aCompiledMethod levels: maxLevelsNumber excludeMethods: compiledMethods [
+	" Open a call graph using aCompiledMethod as root node and up to maxLevelsNumber in the sender chain "
+
+	^ self new
+		rootMethod: aCompiledMethod;
+		excludedMethods: compiledMethods;
 		openCallGraphView: maxLevelsNumber
 ]
 
@@ -140,6 +165,19 @@ CallGraphViz >> configureNodeProperties: fromCompiledMethod to: toCompiledMethod
 ]
 
 { #category : 'filtering' }
+CallGraphViz >> defaultExcludedMethods [
+
+	^ #()
+]
+
+{ #category : 'filtering' }
+CallGraphViz >> defaultExcludedSelectors [
+	"Answer a <Collection> of <Symbol> representing default selectors which won't be analyzed"
+	
+	^ #(#setUp #primitive #test)
+]
+
+{ #category : 'filtering' }
 CallGraphViz >> defaultExcludedTags [
 
 	^ #(#Plugins  #'Plugins-Surface')
@@ -151,14 +189,45 @@ CallGraphViz >> defaultScopeBlock [
 
 	^ [ : cm | 
 			(self packages includes: cm package)
-				and: [ (self excludedTags includes: cm methodClass packageTag) not
-					and: [ (cm selector beginsWithAnyOf: #(#setUp #primitive #test)) not ] ] ]
+				and: [ 
+					(self excludedTags includes: cm methodClass packageTag) not
+						and: [ 
+							(self excludedMethods includes: cm) not 
+								and: [ (cm selector beginsWithAnyOf: self excludedSelectors) not ] ] ] ]
 ]
 
 { #category : 'colors' }
 CallGraphViz >> emptyNodeProperties [
 
 	^ { #fontcolor -> #white . #fillcolor -> 9 }
+]
+
+{ #category : 'filtering' }
+CallGraphViz >> excludedMethods [
+	"Answer a <Collection> of <CompiledMethod> which won't be analyzed"
+	
+	^ excludedMethods
+		ifNil: [ excludedMethods := self defaultExcludedMethods ]
+]
+
+{ #category : 'accessing' }
+CallGraphViz >> excludedMethods: anObject [
+
+	excludedMethods := anObject
+]
+
+{ #category : 'filtering' }
+CallGraphViz >> excludedSelectors [
+	"Answer a <Collection> of <Symbol> representing selectors which won't be analyzed"
+
+	^ excludedSelectors
+		ifNil: [ excludedSelectors := self defaultExcludedSelectors ]
+]
+
+{ #category : 'accessing' }
+CallGraphViz >> excludedSelectors: anObject [
+
+	excludedSelectors := anObject
 ]
 
 { #category : 'filtering' }
