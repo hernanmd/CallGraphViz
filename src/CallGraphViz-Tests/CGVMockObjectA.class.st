@@ -1,8 +1,8 @@
 Class {
 	#name : 'CGVMockObjectA',
 	#superclass : 'Object',
-	#category : 'CallGraphViz',
-	#package : 'CallGraphViz'
+	#category : 'CallGraphViz-Tests',
+	#package : 'CallGraphViz-Tests'
 }
 
 { #category : 'examples' }

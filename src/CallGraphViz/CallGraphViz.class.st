@@ -1,3 +1,16 @@
+"
+It uses `GraphViz` to provide a call graph visualization object. Useful to help you analyze and understand the flow of method calls within your codebase. The idea is to quickly view method sends to uncover dependencies and relationships with ease. You can also easily distinguish between different types of methods sends with color-coded nodes. 
+
+This visual cue aids in quickly identifying key methods and understanding their roles in the overall system.
+
+This class is the main entry point for the package and contains two protocols of interest for the end-user:
+
+- Accessing to the call graph `GraphViz` object.
+- Opening a window to visualize the call graph.
+
+See the class side examples.
+
+"
 Class {
 	#name : 'CallGraphViz',
 	#superclass : 'GraphViz',
@@ -9,9 +22,19 @@ Class {
 		'excludedMethods',
 		'excludedSelectors'
 	],
-	#category : 'CallGraphViz',
-	#package : 'CallGraphViz'
+	#category : 'CallGraphViz-Core',
+	#package : 'CallGraphViz',
+	#tag : 'Core'
 }
+
+{ #category : 'call-graph' }
+CallGraphViz class >> callGraphOfMethod: aCompiledMethod [
+
+	^ self new
+		rootMethod: aCompiledMethod;
+		callGraphView;
+		yourself
+]
 
 { #category : 'call-graph' }
 CallGraphViz class >> callGraphOfMethod: aCompiledMethod packages: aPackagesCollection [
@@ -116,6 +139,46 @@ CallGraphViz >> callGraphLabelProperties: aCompiledMethod [
 			#label -> ('Call Graph of ', aCompiledMethod name). 
 			#fontsize -> 20 
 		}
+]
+
+{ #category : 'accessing - call graph' }
+CallGraphViz >> callGraphOfMethod: aCompiledMethod [
+	
+	^ self
+		name: #callGraphOf , aCompiledMethod selector;
+		configureCallGraphAttributes;
+		iterateCallGraph: aCompiledMethod senders from: aCompiledMethod;
+		add: #graph with: (self callGraphLabelProperties: aCompiledMethod);
+		yourself
+]
+
+{ #category : 'accessing - call graph' }
+CallGraphViz >> callGraphOfMethod: aCompiledMethod levels: maxLevelsNumber [
+	
+	^ self
+		name: #callGraphOf , aCompiledMethod selector;
+		configureCallGraphAttributes;
+		iterateCallGraph: aCompiledMethod senders
+			from: aCompiledMethod
+			levels: maxLevelsNumber;
+		add: #graph with: (self callGraphLabelProperties: aCompiledMethod)
+]
+
+{ #category : 'accessing - call graph' }
+CallGraphViz >> callGraphView [
+	"Answer the receiver call graph using the rootMethod as tree's root"
+
+	^ self 
+		callGraphOfMethod: self rootMethod
+]
+
+{ #category : 'accessing - call graph' }
+CallGraphViz >> callGraphView: maxLevelsNumber [
+	" Answer the receiver starting analysis from the receiver's root method and follow the sender chain up to maxLevelsNumber <Number> "
+
+	^ self 
+		callGraphOfMethod: self rootMethod
+		levels: maxLevelsNumber
 ]
 
 { #category : 'colors' }
