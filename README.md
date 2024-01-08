@@ -19,6 +19,8 @@ methods and understanding their roles in the overall system.
 
 # Installation
 
+It works currently in Pharo 12:
+
 ```smalltalk
 EpMonitor disableDuring: [ 
 	Metacello new	
@@ -40,19 +42,41 @@ If you want to add the CallGraphViz to your Metacello Baselines or Configuration
 
 # Usage
 
-```smalltalk
+To access the GraphViz object:
 
+```smalltalk
+CallGraphViz callGraphOfMethod: (String >> #alike:).
+```
+
+You can then export it in SVG format:
+
+```smalltalk
+(CallGraphViz callGraphOfMethod: (String >> #alike:)) exportToSVG.
+```
+
+To open a window with the call graph:
+
+```smalltalk
+CallGraphViz openCallGraphOfMethod:: (String >> #alike:)
 ```
 
 # Screenshots
 
-These call graphs were produced using Pharo 12:
+## A small call graph
 
 ```smalltalk
-CallGraphViz callGraphOfMethod: (String >> #alike:)
+CallGraphViz openCallGraphOfMethod:: (String >> #alike:)
 ```
 
 ![String-alike](https://github.com/hernanmd/CallGraphViz/assets/4825959/d0f732fe-ad20-4faa-9ebf-5410e4a10474)
+
+## A big call graph
+
+```smalltalk
+CallGraphViz callGraphOfMethod: (MonitorDelay>> #setDelay:forSemaphore:monitor:queue:).
+```
+
+![callGraphOfsetDelayforSemaphoremonitorqueue](https://github.com/hernanmd/CallGraphViz/assets/4825959/8cd25b62-cd73-442d-9da2-183c10ffa5fc)
 
 
 # Contribute
