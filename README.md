@@ -17,6 +17,10 @@
 This package introduces a call graph visualization to help you analyze and understand the flow of method calls within your codebase. The idea is to quickly view method sends to uncover dependencies and relationships with ease. You can also easily distinguish between different types of methods sends with color-coded nodes. This visual cue aids in quickly identifying key 
 methods and understanding their roles in the overall system.
 
+It also includes a menu item to quickly generate a graph for the selected method in the system browser.
+
+![Screenshot 2024-01-08 at 16 10 18](https://github.com/hernanmd/CallGraphViz/assets/4825959/7e056d0d-f443-4af4-a40a-02c811dc3325)
+
 # Installation
 
 It works currently in Pharo 12:
@@ -62,13 +66,18 @@ CallGraphViz openCallGraphOfMethod:: (String >> #alike:)
 
 # Screenshots
 
-## A small call graph
+## Small call graphs
 
 ```smalltalk
 CallGraphViz openCallGraphOfMethod:: (String >> #alike:)
 ```
+![callGraphOfalike](https://github.com/hernanmd/CallGraphViz/assets/4825959/8a8e5f1e-6a5f-41ae-93af-9d653ef15255)
 
-![String-alike](https://github.com/hernanmd/CallGraphViz/assets/4825959/d0f732fe-ad20-4faa-9ebf-5410e4a10474)
+```smalltalk
+CallGraphViz openCallGraphOfMethod: (ClyBrowserMorph >> #addPlugin:).
+```
+
+![callGraphOfaddPlugin](https://github.com/hernanmd/CallGraphViz/assets/4825959/16070a32-837f-41ce-b46f-bf818d14c481)
 
 ## A big call graph
 
@@ -110,7 +119,7 @@ Thus, it should be safe to depend on a fixed major version and moving minor vers
 	
 This software is licensed under the MIT License.
 
-Copyright Hernán Morales Durand, 2022.
+Copyright Hernán Morales Durand, 2024.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
